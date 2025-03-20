@@ -1,0 +1,36 @@
+{
+  "user_rewards": [
+    {
+      "user_id": "user1",
+      "reward_id": "reward1",
+      "reward_type": "SURPRISE_DROP",
+      "points": 500,
+      "claimed_at": "2024-03-19T10:00:00",
+      "status": "CLAIMED"
+    },
+    {
+      "user_id": "user2",
+      "reward_id": "reward2",
+      "reward_type": "CHALLENGE_COMPLETION",
+      "points": 1000,
+      "claimed_at": "2024-03-19T15:30:00",
+      "status": "CLAIMED"
+    },
+    {
+      "user_id": "user3",
+      "reward_id": "reward3",
+      "reward_type": "STREAK_BONUS",
+      "points": 200,
+      "claimed_at": "2024-03-20T00:00:00",
+      "status": "CLAIMED"
+    },
+    {
+      "user_id": "user1",
+      "reward_id": "reward4",
+      "reward_type": "ACHIEVEMENT_BONUS",
+      "points": 300,
+      "claimed_at": "2024-03-20T09:15:00",
+      "status": "CLAIMED"
+    }
+  ]
+} 

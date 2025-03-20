@@ -1,0 +1,40 @@
+{
+  "users": [
+    {
+      "user_id": "user1",
+      "username": "john_doe",
+      "total_points": 2500,
+      "tier": "SILVER",
+      "last_login_date": "2024-03-20T15:30:00",
+      "last_points_decay_date": "2024-02-20T00:00:00",
+      "current_login_streak": 5,
+      "followers_count": 150,
+      "following_count": 120,
+      "last_surprise_drop_check": "2024-03-19T10:00:00"
+    },
+    {
+      "user_id": "user2",
+      "username": "jane_smith",
+      "total_points": 7500,
+      "tier": "GOLD",
+      "last_login_date": "2024-03-20T16:45:00",
+      "last_points_decay_date": "2024-02-20T00:00:00",
+      "current_login_streak": 12,
+      "followers_count": 450,
+      "following_count": 300,
+      "last_surprise_drop_check": "2024-03-19T14:30:00"
+    },
+    {
+      "user_id": "user3",
+      "username": "alex_wilson",
+      "total_points": 25000,
+      "tier": "PLATINUM",
+      "last_login_date": "2024-03-20T17:20:00",
+      "last_points_decay_date": "2024-02-20T00:00:00",
+      "current_login_streak": 30,
+      "followers_count": 1200,
+      "following_count": 800,
+      "last_surprise_drop_check": "2024-03-19T16:15:00"
+    }
+  ]
+} 

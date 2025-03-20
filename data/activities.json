@@ -1,0 +1,44 @@
+{
+  "activities": [
+    {
+      "activity_id": "act1",
+      "user_id": "user1",
+      "type": "POST",
+      "points_earned": 50,
+      "details": "Created a new post",
+      "timestamp": "2024-03-20T15:30:00"
+    },
+    {
+      "activity_id": "act2",
+      "user_id": "user1",
+      "type": "COMMENT",
+      "points_earned": 10,
+      "details": "Commented on user2's post",
+      "timestamp": "2024-03-20T15:35:00"
+    },
+    {
+      "activity_id": "act3",
+      "user_id": "user2",
+      "type": "VIDEO_POST",
+      "points_earned": 100,
+      "details": "Uploaded a new video",
+      "timestamp": "2024-03-20T16:00:00"
+    },
+    {
+      "activity_id": "act4",
+      "user_id": "user2",
+      "type": "LIKE",
+      "points_earned": 5,
+      "details": "Liked user1's post",
+      "timestamp": "2024-03-20T16:15:00"
+    },
+    {
+      "activity_id": "act5",
+      "user_id": "user3",
+      "type": "CHALLENGE_COMPLETION",
+      "points_earned": 500,
+      "details": "Completed weekly challenge",
+      "timestamp": "2024-03-20T17:00:00"
+    }
+  ]
+} 

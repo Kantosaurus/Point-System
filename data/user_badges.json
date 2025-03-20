@@ -1,0 +1,40 @@
+{
+  "user_badges": [
+    {
+      "user_id": "user1",
+      "badge_id": 1,
+      "badge_name": "FIRST_POST",
+      "earned_at": "2024-03-15T10:00:00"
+    },
+    {
+      "user_id": "user1",
+      "badge_id": 2,
+      "badge_name": "SOCIAL_BUTTERFLY",
+      "earned_at": "2024-03-18T14:30:00"
+    },
+    {
+      "user_id": "user2",
+      "badge_id": 1,
+      "badge_name": "FIRST_POST",
+      "earned_at": "2024-03-10T09:15:00"
+    },
+    {
+      "user_id": "user2",
+      "badge_id": 3,
+      "badge_name": "CONTENT_CREATOR",
+      "earned_at": "2024-03-19T16:45:00"
+    },
+    {
+      "user_id": "user3",
+      "badge_id": 1,
+      "badge_name": "FIRST_POST",
+      "earned_at": "2024-03-01T08:00:00"
+    },
+    {
+      "user_id": "user3",
+      "badge_id": 4,
+      "badge_name": "TRENDING_TOPIC",
+      "earned_at": "2024-03-20T12:30:00"
+    }
+  ]
+} 

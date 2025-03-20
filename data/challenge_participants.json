@@ -1,0 +1,36 @@
+{
+  "challenge_participants": [
+    {
+      "user_id": "user1",
+      "challenge_id": "challenge1",
+      "joined_at": "2024-03-20T10:00:00",
+      "current_progress": 3,
+      "target_progress": 5,
+      "status": "IN_PROGRESS"
+    },
+    {
+      "user_id": "user2",
+      "challenge_id": "challenge1",
+      "joined_at": "2024-03-20T11:30:00",
+      "current_progress": 4,
+      "target_progress": 5,
+      "status": "IN_PROGRESS"
+    },
+    {
+      "user_id": "user3",
+      "challenge_id": "challenge2",
+      "joined_at": "2024-03-20T12:00:00",
+      "current_progress": 75,
+      "target_progress": 150,
+      "status": "IN_PROGRESS"
+    },
+    {
+      "user_id": "user1",
+      "challenge_id": "challenge3",
+      "joined_at": "2024-03-20T13:15:00",
+      "current_progress": 1,
+      "target_progress": 3,
+      "status": "IN_PROGRESS"
+    }
+  ]
+} 

@@ -1,0 +1,34 @@
+{
+  "challenges": [
+    {
+      "challenge_id": "challenge1",
+      "name": "Weekly Content Creator",
+      "description": "Create 5 posts in a week",
+      "target_points": 1000,
+      "start_time": "2024-03-20T00:00:00",
+      "end_time": "2024-03-27T23:59:59",
+      "reward": "Exclusive badge and 500 bonus points",
+      "status": "ACTIVE"
+    },
+    {
+      "challenge_id": "challenge2",
+      "name": "Engagement Master",
+      "description": "Get 100 likes and 50 comments on your posts",
+      "target_points": 2000,
+      "start_time": "2024-03-20T00:00:00",
+      "end_time": "2024-03-27T23:59:59",
+      "reward": "Special profile frame and 1000 bonus points",
+      "status": "ACTIVE"
+    },
+    {
+      "challenge_id": "challenge3",
+      "name": "Video Star",
+      "description": "Upload 3 videos with 1000+ views each",
+      "target_points": 3000,
+      "start_time": "2024-03-20T00:00:00",
+      "end_time": "2024-03-27T23:59:59",
+      "reward": "Video creator badge and 1500 bonus points",
+      "status": "ACTIVE"
+    }
+  ]
+} 
