@@ -3,6 +3,9 @@ package com.pointsystem.model;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Connection;
 
 public class PointSystem {
     private Map<String, User> users;
@@ -10,6 +13,13 @@ public class PointSystem {
     private Map<String, LocalDateTime> trendingPosts;
     private List<CollaborativeChallenge> activeCollaborativeChallenges;
     private Random random;
+    private Map<String, List<String>> productPurchases; // productId -> list of buyer userIds
+    private Connection dbConnection;
+    
+    // Fast access data structures
+    private Map<MembershipTier, Set<String>> usersByTier; // tier -> set of userIds
+    private TreeMap<Integer, Set<String>> usersByPoints; // points -> set of userIds
+    private static final int POINT_RANGE_SIZE = 1000; // Size of each point range bucket
 
     public PointSystem() {
         this.users = new HashMap<>();
@@ -17,18 +27,33 @@ public class PointSystem {
         this.trendingPosts = new HashMap<>();
         this.activeCollaborativeChallenges = new ArrayList<>();
         this.random = new Random();
+        this.productPurchases = new HashMap<>();
+        this.usersByTier = new HashMap<>();
+        this.usersByPoints = new TreeMap<>();
+        
+        // Initialize tier sets
+        for (MembershipTier tier : MembershipTier.values()) {
+            usersByTier.put(tier, new HashSet<>());
+        }
+    }
+
+    public PointSystem(Connection dbConnection) {
+        this();
+        this.dbConnection = dbConnection;
     }
 
     public User registerUser(String userId, String username) {
         User newUser = new User(userId, username);
         users.put(userId, newUser);
         leaderboard.add(newUser);
+        updateUserIndices(newUser);
         return newUser;
     }
 
     public void addExistingUser(User user) {
         users.put(user.getUserId(), user);
         leaderboard.add(user);
+        updateUserIndices(user);
     }
 
     public User getUser(String userId) {
@@ -240,25 +265,36 @@ public class PointSystem {
      */
     public int conductLuckyDraw(int minPoints, int maxPoints, MembershipTier selectedTier) {
         int affectedUsers = 0;
+        Set<String> eligibleUsers = new HashSet<>();
 
-        for (User user : users.values()) {
-            // Check if user is within the points range
-            if (user.getTotalPoints() >= minPoints && user.getTotalPoints() <= maxPoints) {
-                // Check if user is in the selected tier (if specified)
-                if (selectedTier == null || user.getTier() == selectedTier) {
-                    // Apply the user's tier multiplier to their points
-                    double tierMultiplier = user.getTier().getPointMultiplier();
-                    int originalPoints = user.getTotalPoints();
-                    int newPoints = (int) (originalPoints * tierMultiplier);
-                    int bonusPoints = newPoints - originalPoints;
-                    
-                    user.addPoints(bonusPoints, PointType.EXPIRING);
-                    user.recordActivity(ActivityType.SURPRISE_DROP, 
-                        String.format("Lucky Draw: Points multiplied by %.2fx! (+%d points)", 
-                            tierMultiplier, bonusPoints));
-                    
-                    affectedUsers++;
-                }
+        // Get eligible users based on points range
+        for (Map.Entry<Integer, Set<String>> entry : usersByPoints.entrySet()) {
+            int rangeStart = entry.getKey();
+            if (rangeStart >= minPoints && rangeStart <= maxPoints) {
+                eligibleUsers.addAll(entry.getValue());
+            }
+        }
+
+        // Filter by tier if specified
+        if (selectedTier != null) {
+            eligibleUsers.retainAll(usersByTier.get(selectedTier));
+        }
+
+        // Apply lucky draw to eligible users
+        for (String userId : eligibleUsers) {
+            User user = users.get(userId);
+            if (user != null) {
+                double tierMultiplier = user.getTier().getPointMultiplier();
+                int originalPoints = user.getTotalPoints();
+                int newPoints = (int) (originalPoints * tierMultiplier);
+                int bonusPoints = newPoints - originalPoints;
+                
+                user.addPoints(bonusPoints, PointType.EXPIRING);
+                user.recordActivity(ActivityType.SURPRISE_DROP, 
+                    String.format("Lucky Draw: Points multiplied by %.2fx! (+%d points)", 
+                        tierMultiplier, bonusPoints));
+                
+                affectedUsers++;
             }
         }
 
@@ -283,5 +319,90 @@ public class PointSystem {
         }
 
         return conductLuckyDraw(minPoints, maxPoints, selectedTier);
+    }
+
+    /**
+     * Records a product purchase by a user
+     * @param userId The ID of the user who made the purchase
+     * @param productId The ID of the purchased product
+     */
+    public void recordProductPurchase(String userId, String productId) {
+        productPurchases.computeIfAbsent(productId, _ -> new ArrayList<>()).add(userId);
+    }
+
+    /**
+     * Conducts a product promotion where a random buyer from non-platinum tiers gets upgraded to Platinum
+     * @param productId The ID of the product for the promotion
+     * @return The selected user's ID if a winner was chosen, null otherwise
+     */
+    public String conductProductPromotion(String productId) {
+        List<String> buyers = productPurchases.get(productId);
+        if (buyers == null || buyers.isEmpty()) {
+            return null;
+        }
+
+        // Get eligible buyers (non-platinum tiers) using the tier index
+        Set<String> eligibleBuyers = new HashSet<>();
+        for (MembershipTier tier : Arrays.asList(MembershipTier.BRONZE, MembershipTier.SILVER, MembershipTier.GOLD)) {
+            eligibleBuyers.addAll(usersByTier.get(tier));
+        }
+        eligibleBuyers.retainAll(buyers);
+
+        if (eligibleBuyers.isEmpty()) {
+            return null;
+        }
+
+        // Select random winner
+        String winnerId = new ArrayList<>(eligibleBuyers).get(random.nextInt(eligibleBuyers.size()));
+        User winner = users.get(winnerId);
+        
+        // Remove user from old indices
+        removeUserFromIndices(winner);
+        
+        // Upgrade winner to Platinum
+        winner.setTier(MembershipTier.PLATINUM);
+        winner.recordActivity(ActivityType.REWARD_EARNED, 
+            "Congratulations! You've been upgraded to Platinum tier through the product promotion!");
+        
+        // Update indices with new tier
+        updateUserIndices(winner);
+        
+        // Update database
+        try {
+            String sql = "UPDATE users SET tier_id = ? WHERE user_id = ?";
+            PreparedStatement stmt = dbConnection.prepareStatement(sql);
+            stmt.setInt(1, MembershipTier.PLATINUM.getTierId());
+            stmt.setString(2, winnerId);
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println("Error updating user tier: " + e.getMessage());
+        }
+
+        return winnerId;
+    }
+
+    private void updateUserIndices(User user) {
+        // Update tier index
+        usersByTier.get(user.getTier()).add(user.getUserId());
+        
+        // Update points index
+        int pointsRange = (user.getTotalPoints() / POINT_RANGE_SIZE) * POINT_RANGE_SIZE;
+        usersByPoints.computeIfAbsent(pointsRange, _ -> new HashSet<>()).add(user.getUserId());
+    }
+
+    private void removeUserFromIndices(User user) {
+        // Remove from tier index
+        usersByTier.get(user.getTier()).remove(user.getUserId());
+        
+        // Remove from points index
+        int pointsRange = (user.getTotalPoints() / POINT_RANGE_SIZE) * POINT_RANGE_SIZE;
+        Set<String> usersInRange = usersByPoints.get(pointsRange);
+        if (usersInRange != null) {
+            usersInRange.remove(user.getUserId());
+            if (usersInRange.isEmpty()) {
+                usersByPoints.remove(pointsRange);
+            }
+        }
     }
 } 

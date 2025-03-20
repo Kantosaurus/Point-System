@@ -673,4 +673,28 @@ private int calculateTimeBonus() {
 - Stronger bonds
 - Better culture
 - More creativity
-- Higher satisfaction 
+- Higher satisfaction
+
+## G. Product Promotion Mechanism
+
+### 1. Record a Product Purchase
+```java
+pointSystem.recordProductPurchase("user123", "product456");
+```
+
+### 2. Conduct the Promotion
+```java
+String winnerId = pointSystem.conductProductPromotion("product456");
+if (winnerId != null) {
+    System.out.println("Winner selected: " + winnerId);
+} else {
+    System.out.println("No eligible winners found");
+}
+```
+
+### 3. Implementation Details
+- The `conductProductPromotion` method filters eligible buyers (non-platinum tiers)
+- Randomly selects a winner from eligible buyers
+- Upgrades the winner to Platinum tier
+- Records the activity in the user's history
+- Updates the database to reflect the tier change 

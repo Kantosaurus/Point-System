@@ -173,6 +173,10 @@ public class User implements Comparable<User> {
         return tier;
     }
 
+    public void setTier(MembershipTier tier) {
+        this.tier = tier;
+    }
+
     public String getUserId() {
         return userId;
     }
