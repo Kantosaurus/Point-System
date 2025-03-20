@@ -337,7 +337,4 @@ public class User implements Comparable<User> {
     public int getWatchTimeForVideo(String videoId) {
         return watchTimeByVideo.getOrDefault(videoId, 0);
     }
-
-    // ... [Rest of the User class methods remain the same]
-    // Note: The rest of the methods from the original file should be copied here
 } 
