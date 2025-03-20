@@ -230,4 +230,58 @@ public class PointSystem {
             }
         }
     }
+
+    /**
+     * Conducts a lucky draw event that can affect users based on their points range and/or tier.
+     * @param minPoints Minimum points for the range (inclusive)
+     * @param maxPoints Maximum points for the range (inclusive)
+     * @param selectedTier Optional tier to filter users (null for all tiers)
+     * @return Number of users affected by the lucky draw
+     */
+    public int conductLuckyDraw(int minPoints, int maxPoints, MembershipTier selectedTier) {
+        int affectedUsers = 0;
+
+        for (User user : users.values()) {
+            // Check if user is within the points range
+            if (user.getTotalPoints() >= minPoints && user.getTotalPoints() <= maxPoints) {
+                // Check if user is in the selected tier (if specified)
+                if (selectedTier == null || user.getTier() == selectedTier) {
+                    // Apply the user's tier multiplier to their points
+                    double tierMultiplier = user.getTier().getPointMultiplier();
+                    int originalPoints = user.getTotalPoints();
+                    int newPoints = (int) (originalPoints * tierMultiplier);
+                    int bonusPoints = newPoints - originalPoints;
+                    
+                    user.addPoints(bonusPoints, PointType.EXPIRING);
+                    user.recordActivity(ActivityType.SURPRISE_DROP, 
+                        String.format("Lucky Draw: Points multiplied by %.2fx! (+%d points)", 
+                            tierMultiplier, bonusPoints));
+                    
+                    affectedUsers++;
+                }
+            }
+        }
+
+        updateLeaderboard();
+        return affectedUsers;
+    }
+
+    /**
+     * Conducts a lucky draw event with random point range.
+     * @return Number of users affected by the lucky draw
+     */
+    public int conductRandomLuckyDraw() {
+        // Randomly select a point range
+        int minPoints = random.nextInt(1000) + 500; // 500-1500
+        int maxPoints = minPoints + random.nextInt(1000) + 500; // minPoints to minPoints+1500
+
+        // 30% chance to select a specific tier
+        MembershipTier selectedTier = null;
+        if (random.nextDouble() < 0.3) {
+            MembershipTier[] tiers = MembershipTier.values();
+            selectedTier = tiers[random.nextInt(tiers.length)];
+        }
+
+        return conductLuckyDraw(minPoints, maxPoints, selectedTier);
+    }
 } 

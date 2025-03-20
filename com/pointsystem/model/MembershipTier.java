@@ -1,10 +1,10 @@
 package com.pointsystem.model;
 
 public enum MembershipTier {
-    BRONZE(1, 0, 999, 0.8, 0.05, "Basic badges, 1 free story highlight/month"),
-    SILVER(2, 1000, 4999, 1.0, 0.05, "Exclusive filters, 2x points on weekends"),
-    GOLD(3, 5000, 19999, 1.5, 0.05, "Analytics dashboard, priority customer support"),
-    PLATINUM(4, 20000, Integer.MAX_VALUE, 2.0, 0.02, "Monetization (ads revenue share), custom emojis, verified checkmark");
+    BRONZE(1, 0, 499, 1.0, 0.05, "Basic badges, 1 free story highlight/month"),
+    SILVER(2, 500, 4999, 1.2, 0.05, "Exclusive filters, 2x points on weekends"),
+    GOLD(3, 5000, 9999, 1.5, 0.04, "Analytics dashboard, priority customer support"),
+    PLATINUM(4, 10000, Integer.MAX_VALUE, 2.0, 0.02, "Monetization (ads revenue share), custom emojis, verified checkmark");
 
     private final int tierId;
     private final int minPoints;

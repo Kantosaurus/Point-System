@@ -157,8 +157,9 @@ public class User implements Comparable<User> {
     public void checkAndApplyPointsDecay() {
         if (lastPointsDecayDate != null) {
             long daysSinceLastDecay = ChronoUnit.DAYS.between(lastPointsDecayDate, LocalDateTime.now());
-            if (daysSinceLastDecay >= 30) { // Apply decay every 30 days
-                totalPoints = (int) (totalPoints * 0.95); // 5% decay
+            if (daysSinceLastDecay >= 7) { // Apply decay every week
+                double decayRate = tier.getWeeklyDecayRate();
+                totalPoints = (int) (totalPoints * (1 - decayRate));
                 lastPointsDecayDate = LocalDateTime.now();
             }
         }
@@ -174,6 +175,10 @@ public class User implements Comparable<User> {
 
     public String getUserId() {
         return userId;
+    }
+
+    public int getTotalPoints() {
+        return totalPoints;
     }
 
     public void addPoints(int points, PointType type) {
