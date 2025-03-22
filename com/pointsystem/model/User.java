@@ -185,10 +185,47 @@ public class User implements Comparable<User> {
         return totalPoints;
     }
 
+    public void processActivity(ActivityType type, String itemId, double amount) {
+        int points = pointSystem.calculatePoints(userId, itemId, type, amount);
+        if (points > 0) {
+            addPoints(points, type.getPointType());
+            recordActivity(type, String.format("Earned %d points for %s", points, type.getDescription()));
+        }
+    }
+
     public void addPoints(int points, PointType type) {
+        if (points <= 0) return;
+        
         this.totalPoints += points;
-        // Update activity history
         activityHistory.add(new Activity(ActivityType.valueOf(type.name()), points, "Points added"));
+        
+        // Update database
+        try {
+            String sql = "UPDATE users SET total_points = ? WHERE user_id = ?";
+            PreparedStatement stmt = dbConnection.prepareStatement(sql);
+            stmt.setInt(1, totalPoints);
+            stmt.setString(2, userId);
+            stmt.executeUpdate();
+            stmt.close();
+            
+            // Record point history
+            sql = "INSERT INTO point_history (user_id, points, point_type, earned_at) VALUES (?, ?, ?, ?)";
+            stmt = dbConnection.prepareStatement(sql);
+            stmt.setString(1, userId);
+            stmt.setInt(2, points);
+            stmt.setString(3, type.name());
+            stmt.setTimestamp(4, java.sql.Timestamp.valueOf(LocalDateTime.now()));
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println("Error updating points: " + e.getMessage());
+        }
+        
+        // Check if tier needs to be updated
+        MembershipTier newTier = MembershipTier.getTierByPoints(totalPoints);
+        if (newTier != tier) {
+            setTier(newTier);
+        }
     }
 
     public void recordActivity(ActivityType type, String details) {

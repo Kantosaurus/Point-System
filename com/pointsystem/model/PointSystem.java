@@ -15,6 +15,7 @@ public class PointSystem {
     private Random random;
     private Map<String, List<String>> productPurchases; // productId -> list of buyer userIds
     private Connection dbConnection;
+    private PointCalculator pointCalculator;
     
     // Fast access data structures
     private Map<MembershipTier, Set<String>> usersByTier; // tier -> set of userIds
@@ -30,6 +31,7 @@ public class PointSystem {
         this.productPurchases = new HashMap<>();
         this.usersByTier = new HashMap<>();
         this.usersByPoints = new TreeMap<>();
+        this.pointCalculator = new PointCalculator();
         
         // Initialize tier sets
         for (MembershipTier tier : MembershipTier.values()) {
@@ -113,24 +115,38 @@ public class PointSystem {
         return false;
     }
     
-    public int calculatePostInteractionPoints(String postId, ActivityType activityType, MembershipTier userTier) {
-        double basePoints = activityType.getBasePoints() * userTier.getPointMultiplier();
+    public int calculatePoints(String userId, String itemId, ActivityType activityType, double amount) {
+        User user = users.get(userId);
+        if (user == null) return 0;
+
+        int basePoints = pointCalculator.calculatePoints(userId, itemId, activityType, amount);
+        if (basePoints == 0) return 0;
+
+        double multiplier = 1.0;
         
-        if (isPostTrending(postId)) {
-            basePoints *= 3.0;
+        // Apply tier multiplier
+        multiplier *= user.getTier().getPointMultiplier();
+        
+        // Apply trending multiplier if applicable
+        if (itemId != null && isPostTrending(itemId)) {
+            multiplier *= 3.0;
         }
         
+        // Apply power hour multiplier
         LocalTime currentTime = LocalTime.now();
         LocalTime startPowerHour = LocalTime.of(18, 0);
         LocalTime endPowerHour = LocalTime.of(21, 0);
-        
         if (currentTime.isAfter(startPowerHour) && currentTime.isBefore(endPowerHour)) {
-            basePoints *= 2.0;
+            multiplier *= 2.0;
         }
-        
-        return (int) basePoints;
+
+        return (int)(basePoints * multiplier);
     }
-    
+
+    public void resetDailyCounts() {
+        pointCalculator.resetDailyCounts();
+    }
+
     public CollaborativeChallenge createCollaborativeChallenge(String name, String description, 
                                                               int targetPoints, int durationHours, 
                                                               String reward) {
